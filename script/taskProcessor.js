@@ -17,4 +17,12 @@ export const calculateStatistics = (tasks) => {
   );
 };
 
-export const groupByUser = (tasks) => {};
+export const groupByUser = (tasks) => {
+    const map = new Map()
+    tasks.forEach(task => {
+        if (!map.has(task.userId)){
+            map.set(task.userId, []);
+        }
+        map.get(task.userId).push(task);
+    })
+};
