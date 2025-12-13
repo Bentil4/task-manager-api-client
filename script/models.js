@@ -62,7 +62,7 @@ export class User {
   }
 
   getCompletionRate() {
-    if (this.tasks.length > 0) return 0;
+    if (this.tasks.length === 0) return 0;
     const completed = this.tasks.filter((task) => task.completed).length;
     return (completed / this.tasks.length) * 100;
   }
