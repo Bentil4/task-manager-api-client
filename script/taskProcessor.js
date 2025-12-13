@@ -4,5 +4,17 @@ export const filterByStatus = (tasks, status) => {
   );
 };
 
-export const calculateStatistics = (tasks) => {};
+export const calculateStatistics = (tasks) => {
+  tasks.reduce(
+    (statistics, task) => {
+      task.completed ? statistics.completed++ : statistics.pending++;
+      return statistics;
+    },
+    {
+      completed: 0,
+      pending: 0,
+    }
+  );
+};
+
 export const groupByUser = (tasks) => {};
