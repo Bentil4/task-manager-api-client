@@ -48,7 +48,9 @@ async function promptUser(users, tasks) {
     switch (choice.trim()) {
       case "1":
         displayTask(tasks);
-        loading = false;
+        break;
+      case "4":
+        displayUserStatistics(users);
         break;
       case "6":
         loading = false;
@@ -72,6 +74,22 @@ function displayTask(tasks) {
   }));
 
   console.table(table);
+}
+
+function displayUserStatistics(users) {
+  console.clear();
+  console.log("Total User Statistics");
+
+  users.forEach((user) => {
+    console.log(`
+        ${user.name} <${user.email}
+        
+        Total Tasks : ${user.tasks.length}
+        Completed: ${user.getTasksByStatus("Completed").length}
+        Pending: ${user.getTasksByStatus("Pending").length}
+        Completion Percentage: ${user.getCompletionRate()}%
+        `);
+  });
 }
 
 main();
