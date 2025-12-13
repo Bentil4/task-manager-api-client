@@ -13,13 +13,18 @@ async function main() {
   const tasks = todosData.map((todos) => new Task(todos));
   console.log(tasks);
 
-  // PromptUser(users, tasks);
+  users.forEach((user) => {
+    user.tasks = tasks.filter((task) => task.userId === user.id);
+  });
 
-  function PromptUser(users, tasks) {
-    let loading = true;
+  promptUser(users, tasks);
+}
 
-    while (loading) {
-      const choice = prompt(`
+function promptUser(users, tasks) {
+  let loading = true;
+
+  while (loading) {
+    const choice = prompt(`
               ===== Task Manager API Client =====
           \n1. Show all tasks
           \n2. Show completed tasks
@@ -29,8 +34,28 @@ async function main() {
           \n6. Exit
           Choose an option:
               `);
+
+    switch (choice) {
+      case "1":
+        displayTask(tasks);
+        break;
+      default:
+        console.log("Unknown choice: ", choice);
     }
   }
+}
+
+function displayTask(tasks) {
+  console.clear();
+  console.log(`\n Task List (${tasks.length} )`);
+  const table = tasks.slice(0, 20).map((task) => ({
+    id: task.id,
+    title: task.title,
+    status: task.getStatus(),
+    userId: task.userId,
+  }));
+
+  console.table(table);
 }
 
 main();
