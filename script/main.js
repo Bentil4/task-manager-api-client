@@ -1,5 +1,14 @@
 import { APIClient } from "./api.js";
 import { Task, User } from "./models.js";
+import readline from "readline";
+import { promisify } from "util";
+
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout,
+});
+
+const question = promisify(rl.question).bind(rl);
 
 const apiClient = new APIClient();
 
@@ -11,7 +20,7 @@ async function main() {
 
   const users = usersData.map((user) => new User(user));
   const tasks = todosData.map((todos) => new Task(todos));
-  console.log(tasks);
+  // console.log(tasks);
 
   users.forEach((user) => {
     user.tasks = tasks.filter((task) => task.userId === user.id);
@@ -20,11 +29,11 @@ async function main() {
   promptUser(users, tasks);
 }
 
-function promptUser(users, tasks) {
+async function promptUser(users, tasks) {
   let loading = true;
 
   while (loading) {
-    const choice = prompt(`
+    const menu = `
               ===== Task Manager API Client =====
           \n1. Show all tasks
           \n2. Show completed tasks
@@ -33,21 +42,28 @@ function promptUser(users, tasks) {
           \n5. Show tasks for a user
           \n6. Exit
           Choose an option:
-              `);
+              `;
+    const choice = await question(menu);
 
-    switch (choice) {
+    switch (choice.trim()) {
       case "1":
         displayTask(tasks);
+        loading = false;
+        break;
+      case "6":
+        loading = false;
         break;
       default:
         console.log("Unknown choice: ", choice);
     }
   }
+
+  rl.close();
 }
 
 function displayTask(tasks) {
   console.clear();
-  console.log(`\n Task List (${tasks.length} )`);
+  console.log(`\n Total Task List (${tasks.length} )`);
   const table = tasks.slice(0, 20).map((task) => ({
     id: task.id,
     title: task.title,
