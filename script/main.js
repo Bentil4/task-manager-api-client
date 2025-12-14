@@ -1,32 +1,44 @@
 import { APIClient } from "./api.js";
 import { Task, User } from "./models.js";
 import readline from "readline";
-import { promisify } from "util";
+// import { promisify } from "util";
+import {
+  filterByStatus,
+  calculateStatistics,
+  groupByUser,
+} from "./taskProcessor.js";
 
 const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout,
 });
 
-const question = promisify(rl.question).bind(rl);
+const question = (query) =>
+  new Promise((resolve) => rl.question(query, resolve));
+
+// const question = promisify(rl.question).bind(rl);
 
 const apiClient = new APIClient();
 
 async function main() {
-  const [usersData, todosData] = await Promise.all([
-    apiClient.fetchUser(),
-    apiClient.fetchTodos(),
-  ]);
+  try {
+    const [usersData, todosData] = await Promise.all([
+      apiClient.fetchUser(),
+      apiClient.fetchTodos(),
+    ]);
 
-  const users = usersData.map((user) => new User(user));
-  const tasks = todosData.map((todos) => new Task(todos));
-  // console.log(tasks);
+    const users = usersData.map((user) => new User(user));
+    const tasks = todosData.map((todos) => new Task(todos));
+    // console.log(tasks);
 
-  users.forEach((user) => {
-    user.tasks = tasks.filter((task) => task.userId === user.id);
-  });
+    users.forEach((user) => {
+      user.tasks = tasks.filter((task) => task.userId === user.id);
+    });
 
-  promptUser(users, tasks);
+    promptUser(users, tasks);
+  } catch (error) {
+    console.error("Error fetching data:", error.message);
+  }
 }
 
 async function promptUser(users, tasks) {
@@ -49,8 +61,17 @@ async function promptUser(users, tasks) {
       case "1":
         displayTask(tasks);
         break;
+      case "2":
+        displayTask(filterByStatus(tasks, "completed"));
+        break;
+      case "3":
+        displayTask(filterByStatus(tasks, "pending"));
+        break;
       case "4":
         displayUserStatistics(users);
+        break;
+      case "5":
+        await displayUserTasks(users, tasks);
         break;
       case "6":
         loading = false;
@@ -64,8 +85,12 @@ async function promptUser(users, tasks) {
 }
 
 function displayTask(tasks) {
+  if (!tasks || !Array.isArray(tasks)) {
+    console.log("No tasks to display");
+    return;
+  }
   console.clear();
-  console.log(`\n Total Task List (${tasks.length} )`);
+  console.log(`\n Total Task List (${tasks.length})`);
   const table = tasks.slice(0, 20).map((task) => ({
     id: task.id,
     title: task.title,
@@ -82,14 +107,37 @@ function displayUserStatistics(users) {
 
   users.forEach((user) => {
     console.log(`
-        ${user.name} <${user.email}
+        ${user.name} <${user.email}>
         
         Total Tasks : ${user.tasks.length}
-        Completed: ${user.getTasksByStatus("Completed").length}
-        Pending: ${user.getTasksByStatus("Pending").length}
+        Completed: ${user.getTasksByStatus("completed").length}
+        Pending: ${user.getTasksByStatus("pending").length}
         Completion Percentage: ${user.getCompletionRate()}%
         `);
   });
+}
+
+async function displayUserTasks(users, tasks) {
+  const userInput = await question("Enter user ID: ");
+  const userId = Number(userInput.trim());
+  if (!Number.isInteger(userId)) {
+    console.log("Please enter a valid numeric user ID.");
+  }
+
+  const user = users.find((user) => user.id === userId);
+
+  if (!user) {
+    console.log("User not found");
+    return;
+  }
+  console.clear();
+  console.log("User Tasks");
+  console.log(user.name);
+  const userTask = tasks.map((task) => ({
+    title: task.title,
+    status: task.getStatus(),
+  }));
+  console.table(userTask);
 }
 
 main();
