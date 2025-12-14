@@ -1,5 +1,6 @@
 export const filterByStatus = (tasks, status) => {
-  return tasks.filter((task) => status === "completed" ? task.completed : !task.completed
+  return tasks.filter((task) =>
+    status === "completed" ? task.completed : !task.completed
   );
 };
 
@@ -25,3 +26,4 @@ export const groupByUser = (tasks) => {
     map.get(task.userId).push(task);
   });
   return map;
+};
