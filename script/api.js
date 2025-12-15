@@ -34,17 +34,15 @@ export class APIClient {
     }
   }
 
-  async fetchUserTodos(userID) {
-    const url = `${this.baseURL}/todos/${userID}`;
-    try {
-      const response = await fetch(`${this.baseURL}/todos/${url}`);
-      if (!response.ok)
-        throw new Error(`Failed to fetch todos: ${response.status}`);
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      console.error("FetchTodos error", error.message);
-      throw error;
-    }
+  fetchUserTodos(userId) {
+    return fetch(`${this.baseURL}/todos?userId=${userId}`)
+      .then((response) => {
+        if (!response.ok) throw new Error(`Failed to fetch user todos`);
+        return response.json();
+      })
+      .catch((error) => {
+        console.error(error.message);
+        return [];
+      });
   }
 }
