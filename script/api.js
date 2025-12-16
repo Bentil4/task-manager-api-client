@@ -1,40 +1,42 @@
-import fetch from "node-fetch";
-
-const BASE_URL = "https://jsonplaceholder.typicode.com";
+import { BASE_API_URL } from "../config.js";
+const BASE_URL = BASE_API_URL;
 
 export class APIClient {
   constructor(baseURL = BASE_URL) {
     this.baseURL = baseURL;
+    this.cache = new Map();
+  }
+
+  async CachedData(endpoint) {
+    if (this.cache.has(endpoint)) {
+      return this.cache.get(endpoint);
+    }
+
+    try {
+      const response = await fetch(`${this.baseURL}${endpoint}`);
+      if (!response.ok)
+        throw new Error(`Failed to fetch user: ${response.status}`);
+
+      const data = await response.json();
+      this.cache.set(endpoint, data);
+      return data;
+    } catch (error) {
+      console.error(endpoint.message);
+      return [];
+    }
   }
 
   async fetchUser() {
-    const url = `${this.baseURL}/users`;
-    try {
-      const response = await fetch(url);
-      if (!response.ok)
-        throw new Error(`Failed to fetch user: ${response.status}`);
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      console.error("FetchUsers error", error.message);
-      throw error;
-    }
+    return this.CachedData("/users");
   }
 
   async fetchTodos() {
-    try {
-      const response = await fetch(`${this.baseURL}/todos`);
-      if (!response.ok)
-        throw new Error(`Failed to fetch todos: ${response.status}`);
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      console.error("FetchTodos error", error.message);
-      throw error;
-    }
+    return this.CachedData("/todos");
   }
 
   fetchUserTodos(userId) {
+    const url = `${this.baseURL}todos?userId=${userId}}`;
+
     return fetch(`${this.baseURL}/todos?userId=${userId}`)
       .then((response) => {
         if (!response.ok) throw new Error(`Failed to fetch user todos`);

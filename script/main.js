@@ -1,12 +1,7 @@
 import { APIClient } from "./api.js";
 import { Task, User } from "./models.js";
 import readline from "readline";
-// import { promisify } from "util";
-import {
-  filterByStatus,
-  calculateStatistics,
-  groupByUser,
-} from "./taskProcessor.js";
+import { filterByStatus, groupByUser } from "./taskProcessor.js";
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -15,8 +10,6 @@ const rl = readline.createInterface({
 
 const question = (query) =>
   new Promise((resolve) => rl.question(query, resolve));
-
-// const question = promisify(rl.question).bind(rl);
 
 const apiClient = new APIClient();
 
@@ -29,10 +22,10 @@ async function main() {
 
     const users = usersData.map((user) => new User(user));
     const tasks = todosData.map((todos) => new Task(todos));
-    // console.log(tasks);
 
+    const taskMap = groupByUser(tasks);
     users.forEach((user) => {
-      user.tasks = tasks.filter((task) => task.userId === user.id);
+      user.tasks = taskMap.get(user.id || []);
     });
 
     promptUser(users, tasks);
@@ -47,12 +40,13 @@ async function promptUser(users, tasks) {
   while (loading) {
     const menu = `
               ===== Task Manager API Client =====
-          \n1. Show all tasks
-          \n2. Show completed tasks
-          \n3. Show pending tasks
-          \n4. Show user statistics
-          \n5. Show tasks for a user
-          \n6. Exit
+          1. Show all tasks
+          2. Show completed tasks
+          3. Show pending tasks
+          4. Show user statistics
+          5. Show tasks for a user
+          6. List all users
+          7. Exit
           Choose an option:
               `;
     const choice = await question(menu);
@@ -71,9 +65,12 @@ async function promptUser(users, tasks) {
         displayUserStatistics(users);
         break;
       case "5":
-        await displayUserTasks(users, tasks);
+        await displayUserTasks(users, apiClient);
         break;
       case "6":
+        users.forEach((user) => console.log(user.toString()));
+        break;
+      case "7":
         loading = false;
         break;
       default:
@@ -117,7 +114,7 @@ function displayUserStatistics(users) {
   });
 }
 
-async function displayUserTasks(users, tasks) {
+async function displayUserTasks(users, apiClient) {
   const userInput = await question("Enter user ID: ");
   const userId = Number(userInput.trim());
   if (!Number.isInteger(userId)) {
@@ -131,13 +128,15 @@ async function displayUserTasks(users, tasks) {
     return;
   }
   console.clear();
-  console.log("User Tasks");
   console.log(user.name);
-  const userTask = tasks.map((task) => ({
+  const userTodos = await apiClient.fetchUserTodos(userId);
+
+  const userTasks = userTodos.map((task) => new Task(task));
+  const table = userTasks.map((task) => ({
     title: task.title,
     status: task.getStatus(),
   }));
-  console.table(userTask);
+  console.table(table);
 }
 
 main();
