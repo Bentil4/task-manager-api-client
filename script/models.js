@@ -21,7 +21,7 @@ export class Task {
 
 export class PriorityTask extends Task {
   constructor(taskData, priority = "medium", dueDate = null) {
-    super(taskData);
+    super({ ...taskData });
     this.priority = priority;
     this.dueDate = dueDate;
   }
@@ -74,6 +74,14 @@ export class User {
   }
 
   toString() {
-    return `${this.name} <${this.email}> (${this.tasks.length} tasks)`;
+    console.clear();
+    const table = {
+      id: this.id,
+      name: this.name,
+      email: this.email,
+      tasks: `${this.tasks.length} tasks`,
+    };
+    console.table(table);
+    // return `${this.id} ${this.name} <${this.email}> (${this.tasks.length} tasks)`;
   }
 }
