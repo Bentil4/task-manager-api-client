@@ -15,13 +15,13 @@ export class APIClient {
     try {
       const response = await fetch(`${this.baseURL}${endpoint}`);
       if (!response.ok) {
-          throw new Error(`Failed to fetch user: ${response.status}`);
+        throw new Error(`Failed to fetch user: ${response.status}`);
       }
       const data = await response.json();
       this.cache.set(endpoint, data);
       return data;
     } catch (error) {
-      console.error(endpoint.message);
+      console.error(error.message);
       return [];
     }
   }
@@ -35,8 +35,6 @@ export class APIClient {
   }
 
   fetchUserTodos(userId) {
-    const url = `${this.baseURL}todos?userId=${userId}}`;
-
     return fetch(`${this.baseURL}/todos?userId=${userId}`)
       .then((response) => {
         if (!response.ok) throw new Error(`Failed to fetch user todos`);
