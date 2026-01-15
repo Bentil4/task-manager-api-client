@@ -12,18 +12,13 @@ export class APIClient {
       return this.cache.get(endpoint);
     }
 
-    try {
-      const response = await fetch(`${this.baseURL}${endpoint}`);
-      if (!response.ok) {
-        throw new Error(`Failed to fetch user: ${response.status}`);
-      }
-      const data = await response.json();
-      this.cache.set(endpoint, data);
-      return data;
-    } catch (error) {
-      console.error(error.message);
-      return [];
+    const response = await fetch(`${this.baseURL}${endpoint}`);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch ${endpoint}: ${response.status}`);
     }
+    const data = await response.json();
+    this.cache.set(endpoint, data);
+    return data;
   }
 
   async fetchUser() {

@@ -31,6 +31,8 @@ async function main() {
     promptUser(users, tasks);
   } catch (error) {
     console.error("Error fetching data:", error.message);
+    rl.close();
+    process.exit(1);
   }
 }
 
