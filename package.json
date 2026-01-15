@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "type": "module",
   "main": "script/main.js",
+  "scripts": {
+    "start": " node script/main.js"
+  },
   "dependencies": {
     "node-fetch": "^3.3.2"
   }
