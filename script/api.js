@@ -41,12 +41,3 @@ export class APIClient {
       });
   }
 }
-
-export function sum(a, b) {
-  return a + b;
-}
-
-export function empty() {
-  let number = 1;
-  return number;
-}
