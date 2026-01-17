@@ -79,4 +79,34 @@ describe("taskProcessor utilities", () => {
       expect(() => calculateStatistics(null)).toThrow();
     });
   });
+
+  // groupByUser()
+  describe("groupByUser()", () => {
+    test("groups tasks correctly into a Map", () => {
+      const map = groupByUser(tasks);
+      expect(map.get(1).length).toBe(2);
+      expect(map.get(2).length).toBe(1);
+      expect(map.get(3).length).toBe(1);
+    });
+
+    test("works with 1 task", () => {
+      const map = groupByUser([{ id: 1, userId: 99, completed: false }]);
+      expect(map.get(99).length).toBe(1);
+    });
+
+    test("returns empty map for empty array", () => {
+      const map = groupByUser([]);
+      expect(map.size).toBe(0);
+    });
+
+    test("throws for null input", () => {
+      expect(() => groupByUser(null)).toThrow();
+    });
+
+    test("handles tasks without userId (puts under undefined key)", () => {
+      const map = groupByUser([{ id: 1, completed: false }]);
+      expect(map.has(undefined)).toBe(true);
+      expect(map.get(undefined).length).toBe(1);
+    });
+  });
 });
