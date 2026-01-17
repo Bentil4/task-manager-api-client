@@ -219,5 +219,140 @@ describe("Models: Task, PriorityTask, User", () => {
       });
     });
   });
+
+  // User Class
+  describe("User", () => {
+    let user;
+
+    beforeEach(() => {
+      user = new User({
+        id: 501,
+        name: "Nana Bentil",
+        email: "bentil@example.com",
+      });
+    });
+
+    describe("constructor()", () => {
+      test("initializes fields and starts with empty tasks array", () => {
+        expect(user.id).toBe(501);
+        expect(user.name).toBe("Nana Bentil");
+        expect(user.email).toBe("bentil@example.com");
+        expect(Array.isArray(user.tasks)).toBe(true);
+        expect(user.tasks.length).toBe(0);
+      });
+    });
+
+    describe("addTask()", () => {
+      test("adds a valid Task instance", () => {
+        const t = new Task({
+          id: 1,
+          title: "T",
+          completed: false,
+          userId: 501,
+        });
+        user.addTask(t);
+        expect(user.tasks).toHaveLength(1);
+        expect(user.tasks[0]).toBe(t);
+      });
+
+      test("throws when adding a non-Task object", () => {
+        expect(() => user.addTask({ id: 2 })).toThrow(
+          "Can only add Task instances"
+        );
+      });
+
+      test("throws when adding null", () => {
+        expect(() => user.addTask(null)).toThrow("Can only add Task instances");
+      });
+    });
+
+    describe("getCompletionRate()", () => {
+      test("returns 0 when there are no tasks", () => {
+        expect(user.getCompletionRate()).toBe(0);
+      });
+
+      test("calculates correct percentage for mixed tasks (1/2 = 50%)", () => {
+        user.addTask(
+          new Task({ id: 1, title: "A", completed: true, userId: 501 })
+        );
+        user.addTask(
+          new Task({ id: 2, title: "B", completed: false, userId: 501 })
+        );
+        expect(user.getCompletionRate()).toBe(50);
+      });
+
+      test("calculates correct percentage with rounding tolerance (2/3 ≈ 66.67%)", () => {
+        user.addTask(new Task({ id: 1, completed: true, userId: 501 }));
+        user.addTask(new Task({ id: 2, completed: true, userId: 501 }));
+        user.addTask(new Task({ id: 3, completed: false, userId: 501 }));
+        expect(user.getCompletionRate()).toBeCloseTo(66.666, 2);
+      });
+    });
+
+    describe("getTasksByStatus()", () => {
+      let completedTask, pendingTask;
+
+      beforeEach(() => {
+        completedTask = new Task({
+          id: 1,
+          title: "Done",
+          completed: true,
+          userId: 501,
+        });
+        pendingTask = new Task({
+          id: 2,
+          title: "Todo",
+          completed: false,
+          userId: 501,
+        });
+        user.addTask(completedTask);
+        user.addTask(pendingTask);
+      });
+
+      test("filters completed tasks", () => {
+        const list = user.getTasksByStatus("completed");
+        expect(list).toHaveLength(1);
+        expect(list[0]).toBe(completedTask);
+      });
+
+      test("filters pending tasks", () => {
+        const list = user.getTasksByStatus("pending");
+        expect(list).toHaveLength(1);
+        expect(list[0]).toBe(pendingTask);
+      });
+    });
+
+    describe("toString() side effects", () => {
+      let clearSpy, tableSpy;
+
+      beforeEach(() => {
+        clearSpy = jest.spyOn(console, "clear").mockImplementation(() => {});
+        tableSpy = jest.spyOn(console, "table").mockImplementation(() => {});
+      });
+
+      afterEach(() => {
+        clearSpy.mockRestore();
+        tableSpy.mockRestore();
+      });
+
+      test("calls console.clear and console.table with expected structure", () => {
+        user.addTask(
+          new Task({ id: 1, title: "X", completed: false, userId: 501 })
+        );
+        user.toString(); // function logs a table; no explicit return currently
+
+        expect(clearSpy).toHaveBeenCalledTimes(1);
+        expect(tableSpy).toHaveBeenCalledTimes(1);
+        // Ensure the table includes expected fields (the exact object shape is built in models.js)
+        const callArg = tableSpy.mock.calls[0][0];
+        expect(callArg).toMatchObject({
+          id: 501,
+          name: "Nana Bentil",
+          email: "bentil@example.com",
+          tasks: expect.stringMatching(/1 tasks/),
+        });
+      });
+    });
+  });
 });
 ``;
