@@ -3,3 +3,4 @@ config.js
 .idea/
 tests-vitest/
 vitest.config.js
+coverage/

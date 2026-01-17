@@ -5,7 +5,9 @@
   "main": "script/main.js",
   "scripts": {
     "start": " node script/main.js",
-    "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js"
+    "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js",
+    "test:watch": "NODE_OPTIONS=--no-warnings jest --watch",
+    "test:coverage": "NODE_OPTIONS=--no-warnings jest --coverage"
   },
   "dependencies": {
     "node-fetch": "^3.3.2"
