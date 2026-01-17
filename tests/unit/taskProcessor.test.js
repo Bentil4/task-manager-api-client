@@ -46,4 +46,37 @@ describe("taskProcessor utilities", () => {
       expect(result.every((t) => t.completed === false)).toBe(true);
     });
   });
+
+  // calculateStatistics()
+  describe("calculateStatistics()", () => {
+    test("counts completed and pending tasks correctly", () => {
+      const stats = calculateStatistics(tasks);
+      expect(stats).toEqual({ completed: 2, pending: 2 });
+    });
+
+    test("empty array returns zeroed statistics", () => {
+      const stats = calculateStatistics([]);
+      expect(stats).toEqual({ completed: 0, pending: 0 });
+    });
+
+    test("handles all tasks completed", () => {
+      const stats = calculateStatistics([
+        { completed: true },
+        { completed: true },
+      ]);
+      expect(stats).toEqual({ completed: 2, pending: 0 });
+    });
+
+    test("handles all tasks pending", () => {
+      const stats = calculateStatistics([
+        { completed: false },
+        { completed: false },
+      ]);
+      expect(stats).toEqual({ completed: 0, pending: 2 });
+    });
+
+    test("throws if tasks is null", () => {
+      expect(() => calculateStatistics(null)).toThrow();
+    });
+  });
 });
