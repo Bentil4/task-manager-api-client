@@ -109,5 +109,115 @@ describe("Models: Task, PriorityTask, User", () => {
       });
     });
   });
+
+  // PriorityTask Class
+
+  describe("PriorityTask", () => {
+    let baseData;
+
+    beforeEach(() => {
+      baseData = {
+        id: 11,
+        title: "Priority work",
+        completed: false,
+        userId: 202,
+      };
+    });
+
+    test("inherits from Task", () => {
+      const p = new PriorityTask(baseData, "high", null);
+      expect(p instanceof Task).toBe(true);
+    });
+
+    test("sets priority and dueDate (explicit)", () => {
+      const due = new Date(Date.now() + 24 * 60 * 60 * 1000);
+      const p = new PriorityTask(baseData, "high", due);
+      expect(p.priority).toBe("high");
+      expect(p.dueDate).toBeInstanceOf(Date);
+    });
+
+    test("defaults: priority='medium', dueDate=null when not provided", () => {
+      const p = new PriorityTask(baseData);
+      expect(p.priority).toBe("medium");
+      expect(p.dueDate).toBeNull();
+    });
+
+    describe("isOverDue() logic (per current implementation)", () => {
+      test("returns false when dueDate is null", () => {
+        const p = new PriorityTask(baseData, "low", null);
+        expect(p.isOverDue()).toBe(false);
+      });
+
+      test("returns false when past due but not completed", () => {
+        const past = new Date(Date.now() - 24 * 60 * 60 * 1000);
+        const p = new PriorityTask(baseData, "low", past);
+        // completed is false by default in baseData
+        expect(p.isOverDue()).toBe(false);
+      });
+
+      test("returns true when past due AND completed = true", () => {
+        const past = new Date(Date.now() - 24 * 60 * 60 * 1000);
+        const p = new PriorityTask(
+          { ...baseData, completed: true },
+          "low",
+          past
+        );
+        expect(p.isOverDue()).toBe(true);
+      });
+
+      test("returns false when dueDate is in the future", () => {
+        const future = new Date(Date.now() + 24 * 60 * 60 * 1000);
+        const p = new PriorityTask(
+          { ...baseData, completed: true },
+          "low",
+          future
+        );
+        expect(p.isOverDue()).toBe(false);
+      });
+    });
+
+    describe("getStatus()", () => {
+      test('returns "overdue" when isOverDue() is true', () => {
+        const past = new Date(Date.now() - 24 * 60 * 60 * 1000);
+        const p = new PriorityTask(
+          { ...baseData, completed: true },
+          "high",
+          past
+        );
+        expect(p.getStatus()).toBe("overdue");
+      });
+
+      test("delegates to super.getStatus() when not overdue and completed=false", () => {
+        const p = new PriorityTask(baseData, "medium", null);
+        expect(p.getStatus()).toBe("Pending");
+      });
+
+      test("delegates to super.getStatus() when not overdue and completed=true", () => {
+        const p = new PriorityTask(
+          { ...baseData, completed: true },
+          "medium",
+          null
+        );
+        expect(p.getStatus()).toBe("Completed");
+      });
+    });
+
+    describe("toggle()", () => {
+      test("returns object with id, completed, priority and toggles completion", () => {
+        const p = new PriorityTask(baseData, "high", null);
+        const result = p.toggle();
+        expect(result).toEqual({ id: 11, completed: true, priority: "high" });
+        expect(p.completed).toBe(true);
+      });
+
+      test("second toggle returns to false", () => {
+        const p = new PriorityTask(baseData, "high", null);
+        p.toggle(); // true
+        const result = p.toggle(); // false
+        expect(result).toEqual({ id: 11, completed: false, priority: "high" });
+        expect(p.completed).toBe(false);
+      });
+    });
+  });
 });
 ``;
