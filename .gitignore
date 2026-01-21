@@ -1,6 +1,8 @@
 node_modules/
-config.js
 .idea/
 tests-vitest/
 vitest.config.js
 coverage/
+.vscode
+.qodo
+.idea
