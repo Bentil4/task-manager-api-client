@@ -14,13 +14,11 @@ The testing approach followed a layered methodology:
 
 2. **Integration Testing**  
    Modules were tested together to validate real-world workflows such as:
-
    - API calls -> transforming data -> creating Task/User models -> grouping tasks
    - Multi‑step processes involving the APIClient and taskProcessor utilities
 
 3. **Mocking Strategy**  
    External systems such as network requests were replaced with mock functions using:
-
    - `jest.fn()`
    - `mockResolvedValue()`
    - `mockRejectedValue()`  
@@ -238,20 +236,5 @@ Integration tests simulate real usage of the application and ensure the modules 
 | E2E         | Validating real user experience across entire application |
 
 ---
-
-# 7. CONCLUSION
-
-All deliverables have been successfully completed:
-
-60+ tests written  
- 80%+ coverage achieved  
- API integration tests with mocks  
- Data flow integration tests  
- Unit tests for models and utilities  
- Tests using spies  
- Mock files created  
- Documentation complete
-
-This test suite provides strong confidence in system reliability, correctness, and maintainability.
 
 ``
